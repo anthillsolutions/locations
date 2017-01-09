@@ -6,7 +6,8 @@ Location generator in node
 Author
 ------
 
-Pierre Repetto-Andipatin <pierre@anthillsolutions.ch>
+* Kasun Samarasinghe - <kasun@anthillsolutions.ch>
+* Pierre Repetto-Andipatin - <pierre@anthillsolutions.ch>
 
 License
 -------
