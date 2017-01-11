@@ -6,20 +6,51 @@ mongoose.Promise = require('bluebird');
 var Location = require('./models/Location.js');
 
 mongoose.connect(process.env.MONGODB_URI);
-mongoose.connection.on('error', function () {
-  console.log(
-    'MongoDB Connection Error. Please make sure that MongoDB is running.'
-  );
-  process.exit(1);
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console,
+  'MongoDB Connection Error. ' +
+  'Please make sure that MongoDB is running.\n'));
+
+db.once('open', () => {
+  console.log('Connection opened.');
+
+  switch (process.env.ACTION) {
+    case 'flush': {
+      flush();
+      break;
+    }
+    default: {
+      saveSimple();
+    }
+  }
 });
 
-var location = new Location({
-  timestamp: new Date().getTime(),
-  latitude: '12.12',
-  longitude: '5.14',
-});
+function flush() {
+  Location.remove({}).exec()
+    .then(() => {
+      console.log('Database has been flushed.');
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+}
 
-location.save(function (err, location) {
-  console.log(location);
-  process.exit(0);
-});
+function saveSimple() {
+  var location = new Location({
+    timestamp: new Date().getTime(),
+    latitude: '12.12',
+    longitude: '5.14',
+  });
+  location.save()
+    .then(location => {
+      console.log(location);
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+}

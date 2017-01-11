@@ -9,6 +9,6 @@ var locationsSchema = new mongoose.Schema({
   longitude: String,
 });
 
-var Stocks = mongoose.model('Stocks', locationsSchema);
+var Locations = mongoose.model('Locations', locationsSchema);
 
-module.exports = Stocks;
+module.exports = Locations;
