@@ -5,6 +5,9 @@ var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 var Location = require('./models/Location.js');
 
+var package_version = require('./package.json');
+console.log("version: "+package_version.version);
+
 mongoose.connect(process.env.MONGODB_URI);
 
 var db = mongoose.connection;
