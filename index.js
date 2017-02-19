@@ -24,7 +24,7 @@ db.once('open', () => {
       break;
     }
     default: {
-      saveSimple();
+      saveLocation();
     }
   }
 });
@@ -41,6 +41,14 @@ function flush() {
     });
 }
 
+function saveLocation() {
+  if (process.env.BULK_SAVE > 0) {
+    saveMultiple(process.env.BULK_SAVE);
+  } else {
+    saveSimple();
+  }
+}
+
 function saveSimple() {
   var location = new Location({
     timestamp: new Date().getTime(),
@@ -50,6 +58,32 @@ function saveSimple() {
   location.save()
     .then(location => {
       console.log(location);
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+}
+
+function saveMultiple(count) {
+
+  var locations = [];
+
+  // Creating locations with random coordinates and adding them to an array
+  for (var i = 0; i < count; i++) {
+    var location = new Location({
+      timestamp: new Date().getTime(),
+      latitude: Math.round((Math.random() * 90) * 100) / 100 ,
+      longitude: Math.round((Math.random() * 180) * 100) / 100,
+    });
+    locations[i] = location;
+  }
+
+  // Bulk inserting the array of locations into the DB
+  Location.insertMany(locations)
+    .then(locations => {
+      console.log(locations);
       process.exit(0);
     })
     .catch(err => {
