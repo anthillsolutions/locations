@@ -23,6 +23,10 @@ db.once('open', () => {
       flush();
       break;
     }
+    case 'find': {
+      findLocation();
+      break;
+    }
     default: {
       saveLocation();
     }
@@ -84,6 +88,68 @@ function saveMultiple(count) {
   Location.insertMany(locations)
     .then(locations => {
       console.log(locations);
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+}
+
+function findLocation() {
+
+  var latitudeRange, longitudeRange, timestampRange;
+
+  var query = Location.find({});
+
+  // Latitude Range
+  if(process.env.LATITUDE_RANGE){
+    latitudeRange = process.env.LATITUDE_RANGE.split('-');
+    if(latitudeRange.length == 1){
+      query.where('latitude').equals(latitudeRange[0]);
+    }else{
+      if(latitudeRange[0]){
+        query.where('latitude').gte(latitudeRange[0]);
+      }
+      if(latitudeRange[1]){
+        query.where('latitude').lte(latitudeRange[1]);
+      }
+    }
+  }
+
+  // Longitude Range
+  if(process.env.LONGITUDE_RANGE){
+    longitudeRange = process.env.LONGITUDE_RANGE.split('-');
+    if(longitudeRange.length == 1){
+      query.where('longitude').equals(longitudeRange[0]);
+    }else{
+      if(longitudeRange[0]){
+        query.where('longitude').gte(longitudeRange[0]);
+      }
+      if(longitudeRange[1]){
+        query.where('longitude').lte(longitudeRange[1]);
+      }
+    }
+  }
+
+  // Timestamp range
+  if(process.env.TIMESTAMP_RANGE){
+    timestampRange = process.env.TIMESTAMP_RANGE.split('-');
+    if(timestampRange.length == 1){
+      query.where('timestamp').equals(timestampRange[0]);
+    }else{
+      if(timestampRange[0]){
+        query.where('timestamp').gte(timestampRange[0]);
+      }
+      if(timestampRange[1]){
+        query.where('timestamp').lte(timestampRange[1]);
+      }
+    }
+  }
+
+  query.then(locations => {
+      console.log(locations);
+      console.log('Results :' + locations.length);
       process.exit(0);
     })
     .catch(err => {
