@@ -27,6 +27,11 @@ db.once('open', () => {
       findLocation();
       break;
     }
+    case 'delete': {
+      findLocation();
+      flush();
+      break;
+    }
     default: {
       saveLocation();
     }
