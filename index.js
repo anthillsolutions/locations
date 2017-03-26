@@ -1,5 +1,7 @@
 'use strict';
 
+var async = require('async');
+
 require('dotenv').config({ silent: true });
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -23,13 +25,13 @@ db.once('open', () => {
       flush();
       break;
     }
-    case 'find': {
-      findLocation();
+    case 'find':
+    case 'delete': {
+      findOrDeleteLocation();
       break;
     }
-    case 'delete': {
-      findLocation();
-      flush();
+    case 'getAll': {
+     getAllLocations();
       break;
     }
     default: {
@@ -38,6 +40,20 @@ db.once('open', () => {
   }
 });
 
+function getAllLocations() {
+ console.log("all the data ");
+  Location.find(function(err, searchedLocations) {
+  if (err) {
+    console.log(err);
+   throw err;
+  }
+  console.log(searchedLocations);
+  console.log('total content count : ' +searchedLocations.length);
+  process.exit(0);
+});
+
+
+}
 function flush() {
   Location.remove({}).exec()
     .then(() => {
@@ -101,7 +117,7 @@ function saveMultiple(count) {
     });
 }
 
-function findLocation() {
+function findOrDeleteLocation() {
 
   var latitudeRange, longitudeRange, timestampRange;
 
@@ -151,14 +167,27 @@ function findLocation() {
       }
     }
   }
+  //after setting the find query in above, execute to get the findings or delete
+    if (process.env.ACTION == 'delete') {
+        query.remove({}).exec(function(err) {
+        console.log('deleted the found');
+        process.exit(0);
+        }).catch(err => {
 
-  query.then(locations => {
-      console.log(locations);
-      console.log('Results :' + locations.length);
-      process.exit(0);
-    })
-    .catch(err => {
-      console.error(err);
-      process.exit(1);
-    });
+            console.error(err + 'the errror');
+            process.exit(1);
+          });
+     }
+     else {
+       console.log('in querying ');
+       query.exec(function(err, foundLocations) {
+           console.log(foundLocations);
+           console.log('Results :' + foundLocations.length);
+       process.exit(0);
+         })
+         .catch(err => {
+           console.error(err);
+           process.exit(1);
+         });
+     }
 }
